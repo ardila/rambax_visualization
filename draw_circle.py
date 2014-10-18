@@ -1,22 +1,61 @@
 import gizeh
+import numpy as np
 import moviepy.editor as mpy
-W,H = 128,128 # width, height, in pixels
-duration = 2 # duration of the clip, in seconds
+subdivisions = [2, 1,  .5]
+W,H = 128*len(subdivisions),128 # width, height, in ixels
+duration = 3 # duration of the clip, in seconds
+cycles = 4  #duration of the clip in cycles
+hits = np.array([0, .75, 1.5, 1.75, 2, 2.75, 3.0, 3.5, 3.75])*2*np.pi
+ta = np.array([ 1.5, 1.75, 3.5, 3.75])*2*np.pi
+gin = np.array([.75, 2.75, 3])*2*np.pi
+pax = np.array([0, 1.25, 2])*2*np.pi
+hits = {}
+hits[0] = ta
+hits[1] = gin
+hits[2] = pax
+#add hits at beginning to get burn in
+for channel in hits.keys():
+    hits[channel] = np.concatenate([hits[channel], hits[channel]+(cycles*2*np.pi)])
+print hits
+fade = 2*np.pi
+def ray(R, theta, center, **kw):
+    x,y = center
+    dx,dy = gizeh.polar2cart(R, theta)
+    return gizeh.polyline(points=[(x,y), (x+dx,y+dy)], **kw)
+
+blank = gizeh.Surface(W,H).get_npimage()
+surface = gizeh.Surface(W,H)
+
+
+def spinner(t, center, subdivision, R, channel):
+#    image = blank 
+    theta = (t+duration)/duration*2*np.pi*cycles*subdivision 
+    for hit in hits[channel]*subdivision:
+        #surface = gizeh.Surface(W,H)
+        if theta>hit:
+            i = np.exp((hit-theta)/fade/subdivision)
+            stroke = np.array({0:[0,1,0], 1:[1,0,0], 2:[1,1,0]}[channel])
+            stroke = stroke*i
+            ray(R, hit-(np.pi/2), center, stroke_width=1, stroke=tuple(stroke)).draw(surface)
+ #           image += surface.get_npimage()
+  #  return image
+    #ray(R, theta, center, stroke_width=1, stroke=(1,1,0)).draw(surface) 
+
 def make_frame(t):
-    surface = gizeh.Surface(W,H)
-    length = W*(1+(t*(duration-t))**2)/6
-    #line = gizeh.polyline([(64,64),(70, 64)], xy=(64,64), stroke=(1,0,0), stroke_width=1)
-    line = gizeh.polyline(points=[(64,64), (64+length,64), (40,40), (0,10)], stroke_width=3,
-                     stroke=(1,0,0), fill=(0,1,0))
-    line.draw(surface)
+    image = blank
+    xcenter = 64
+    ycenter = 64
+    for i, subdivision in enumerate(reversed(subdivisions)): 
+       for channel in hits.keys(): 
+            spinner(t, (xcenter, ycenter), subdivision, 64, channel )         
+       xcenter+=128
+       # ycenter += 128
+       # xcenter = 64
+        
+      
+   # for i in range(image.shape[2]):
+#	image[:,:,i] = np.max(image[:,:,i])
+#    return image 
     return surface.get_npimage()
-#def make_frame(t):
-#    surface = gizeh.Surface(W,H)
-#    radius = W*(1+ (t*(duration-t))**2 )/6
-#    circle = gizeh.circle(radius, xy = (W/2,H/2), fill=(1,0,0))
-#    circle.draw(surface)
-#    return surface.get_npimage()
 clip = mpy.VideoClip(make_frame, duration=duration)
-clip.write_gif("circle.gif",fps=15, opt="OptimizePlus", fuzz=10)
-clip = mpy.VideoClip(make_frame, duration=duration)
-clip.write_gif("circle.gif",fps=15, opt="OptimizePlus", fuzz=10)
+clip.write_gif("circle.gif",fps=60, opt="OptimizePlus", fuzz=10)
