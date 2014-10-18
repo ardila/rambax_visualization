@@ -30,7 +30,8 @@ surface = gizeh.Surface(W,H)
 def spinner(t, center, subdivision, R, channel):
 #    image = blank 
     theta = (t+duration)/duration*2*np.pi*cycles*subdivision 
-    for hit in hits[channel]*subdivision:
+    for hit in hits[channel]:
+        hit = hit*subdivision
         #surface = gizeh.Surface(W,H)
         if theta>hit:
             i = np.exp((hit-theta)/fade/subdivision)
