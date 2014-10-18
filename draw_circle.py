@@ -2,7 +2,7 @@ import gizeh
 import numpy as np
 import moviepy.editor as mpy
 subdivisions = [2, 1,  .5]
-W,H = 128*len(subdivisions),128 # width, height, in ixels
+W,H = 256*len(subdivisions),256 # width, height, in ixels
 duration = 3 # duration of the clip, in seconds
 cycles = 4  #duration of the clip in cycles
 hits = np.array([0, .75, 1.5, 1.75, 2, 2.75, 3.0, 3.5, 3.75])*2*np.pi
@@ -37,19 +37,19 @@ def spinner(t, center, subdivision, R, channel):
             i = np.exp((hit-theta)/fade/subdivision)
             stroke = np.array({0:[0,1,0], 1:[1,0,0], 2:[1,1,0]}[channel])
             stroke = stroke*i
-            ray(R, hit-(np.pi/2), center, stroke_width=1, stroke=tuple(stroke)).draw(surface)
+            ray(R, hit-(np.pi/2)+(channel-1)*.005*2*np.pi, center, stroke_width=1, stroke=tuple(stroke)).draw(surface)
  #           image += surface.get_npimage()
   #  return image
-    #ray(R, theta, center, stroke_width=1, stroke=(1,1,0)).draw(surface) 
+#    ray(R, theta, center, stroke_width=1, stroke=(1,1,0)).draw(surface) 
 
 def make_frame(t):
     image = blank
-    xcenter = 64
-    ycenter = 64
+    xcenter = H/2
+    ycenter = H/2
     for i, subdivision in enumerate(reversed(subdivisions)): 
        for channel in hits.keys(): 
-            spinner(t, (xcenter, ycenter), subdivision, 64, channel )         
-       xcenter+=128
+            spinner(t, (xcenter, ycenter), subdivision, H/2, channel )         
+       xcenter+=H
        # ycenter += 128
        # xcenter = 64
         
