@@ -45,9 +45,15 @@ class Leumbel(Rhythm):
 
     talmac = {'ta': [5, 11],
               'gin': [0, 6],
-              'tet': [2, 4, 7, 9]}
+              'tet': [1, 3, 7, 9]}
 
     nyokos = {'ta': [0, 2, 4, 8],
               'gin': [3, 9],
               'pax': [5]}
+
+
+#Dude i actually don't know what baarmbaye is....
+class Baarmbaye(Rhythm):
+    triple = False
+    mbalax = {'ta0'}
 
